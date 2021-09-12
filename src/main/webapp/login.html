@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<title>ログイン</title>
+<script>
+
+function test(){
+	navigator.geolocation.getCurrentPosition(test2);
+}
+
+
+function test2(position) {
+
+//    geo_text += "位置精度:" + position.coords.accuracy + "\n";
+
+    document.getElementById('longitude').value = position.coords.longitude;
+    document.getElementById('latitude').value = position.coords.latitude;
+    document.getElementById('datetime').value = new Date(position.timestamp).toLocaleString();
+
+}
+
+
+</script>
+</head>
+<body onload="test();">
+	<h1>ログイン</h1>
+	<hr>
+	<div align="center">
+		<table border="0">
+			<form action="/demo/postItem" method="post">
+		<tr>
+					<th>緯度　経度　日時</th>
+					<td>
+					<span>
+				<input type="text" id="longitude" name="longitude" value="" />
+				<input type="text" id="latitude" name="latitude" value="" />
+				<input type="tezt" id="datetime" name="datetime" value="" />
+				</span>
+					</td>
+				</tr>
+
+				<tr>
+					<th>ユーザID</th>
+					<td><input type="text" name="id" id="id" value="" size="24"></td>
+				</tr>
+				<!--   tr>
+					<th>パスワード</th>
+					<td><input type="password" name="password" value="" size="24">
+					</td>
+				</tr    -->
+				<tr>
+					<td colspan="2"><input type="submit" value="LOGIN"></td>
+				</tr>
+			</form>
+		</table>
+	</div>
+</body>
+</html>
