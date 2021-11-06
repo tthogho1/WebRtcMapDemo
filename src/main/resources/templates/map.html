@@ -687,8 +687,12 @@ function showInfoWindow() {
 function buildIWContent(place) {
 	  document.getElementById("iw-icon").innerHTML =
 	    '<img class="hotelIcon" ' + 'src="' + place.icon + '"/>';
+
+	  //let cont = "<a href=\"javascript:OpenWebComWindow('" + url + "')\";>" + title + "</a>";
+	  // 	    '<b><a href="OpenWWebComWIndow(' + place.url + ')">' + place.name + "</a></b>";
 	  document.getElementById("iw-url").innerHTML =
-	    '<b><a href="' + place.url + '">' + place.name + "</a></b>";
+	    "<b><a href=\"javascript:OpenWebComWindow('" + place.url + "');\">" + place.url + "</a></b>" ;
+
 	  document.getElementById("iw-address").textContent = place.vicinity;
 
 	  if (place.formatted_phone_number) {
