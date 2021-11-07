@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.demo.bean.ResultStatus;
 import com.example.demo.bean.User;
 //import com.example.domain.Item;
 import com.example.demo.service.ItemService;
@@ -52,5 +53,29 @@ public class ItemRestController {
 		// return customers;
 		return cc ;
 	}
+
+	@RequestMapping(value = "/setUserInfo", method = RequestMethod.POST)
+	public ResultStatus setUserInfo4Connection(HttpServletRequest request) {
+
+		String from = request.getParameter("from");
+		String to = request.getParameter("to");
+
+		ResultStatus rs = itemService.setUserInfor4Connection(from,to);
+
+		return rs ;
+	}
+
+	@RequestMapping(value = "/deleteUserInfo", method = RequestMethod.POST)
+	public ResultStatus deleteUserInfo4Close(HttpServletRequest request) {
+
+		String me = request.getParameter("me");
+		String remote = request.getParameter("remote");
+
+		ResultStatus rs = itemService.deleteUserInfor4Close(me,remote);
+
+		return rs ;
+	}
+
+
 
 }

@@ -10,7 +10,7 @@
 
 <script src="//cdn.webrtc.ecl.ntt.com/skyway-4.4.1.js"></script>
 <script th:src="@{/_shared/key.js}"></script>
-<script th:src="@{/js/webrtc_script.js?20210725}"></script>
+<script th:src="@{/js/webrtc_script.js?20211107}"></script>
 <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
 <!-- script type="text/javascript" th:src="@{/js/connect.js}" ></script -->
 <!--  script	src="https://maps.google.com/maps/api/js?key=AIzaSyAYemHqW9xU48b7KhMXauA6P0fDFTWyly0"></script -->
@@ -403,6 +403,10 @@ function getIdAndLocation() {
 						var element = document.getElementById('chatArea');
 						element.open=true;
 					} else {
+						var me = $('#userid').val();
+						var remote = skywayid;
+						deleteConnectUserData(me,remote);
+
 						dataConnection.send(SKYWAY_DECLINE);
 					}
 				});
@@ -414,7 +418,9 @@ function getIdAndLocation() {
 		});
 
 		dataConnection.once('close', () => {
+
 			alert("close " + $('#userid').val());
+
 		});
 
 		DATACONNECTION = dataConnection;
@@ -434,7 +440,6 @@ function getIdAndLocation() {
 				}
 		);
 	});
-
 
 }
 
@@ -567,11 +572,62 @@ function clearMessages() {
 	$("#content").html("");
 }
 
+function _ajaxforUserCtrl(purl,sendData){
+
+	var status;
+
+	$.ajax({
+        url: purl,
+        type:'POST',
+        data : sendData ,
+        timeout:1000*10,
+        async:false
+    }).done(function(data){
+    	status = data.status;
+    }).fail(function(XMLHttpRequest, textStatus,errorThrown) {
+    	alert("error occurred on update user connection id " + purl );
+    });
+
+	return status;
+}
+
+function updateUserData(from,to){
+	let purl = "./setUserInfo";
+
+	let sendData = "from=" + from + "&to=" + to;
+
+	var status;
+	status = _ajaxforUserCtrl(purl,sendData);
+
+	return status;
+}
+
+
+function deleteConnectUserData(me,remote){
+	let purl = "./deleteUserInfo";
+
+	let sendData = "me=" + me + "&remote=" + remote;
+
+	var status;
+	status = _ajaxforUserCtrl(purl,sendData);
+
+	return status;
+}
 
 function OpenChatWindow(name){
 
     if (!window.confirm("Call to " + name + " ?")){
     	return;
+    }
+
+    // confirm for connection to server
+
+    let from = $("#userid").val();
+    let result = updateUserData(from,name);
+
+    if (result != "OK"){
+    	alert("connected to " + name + "inhibited");
+		return;
     }
 
 	$("#js-remote-id").val(name);
@@ -592,6 +648,7 @@ function OpenChatWindow(name){
 
 	dataConnection.once('close', () => {
 		alert("close " + $('#userid').val());
+
 		remoteId.value='';
 	});
 

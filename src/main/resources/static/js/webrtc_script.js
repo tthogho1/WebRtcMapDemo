@@ -55,7 +55,13 @@ async function main() {
     	    console.log('close button clicked');
     		mediaConnection.close(true);
     		DATACONNECTION.close(true);
+    		//
+    		//
+    		var me = $('#userid').val();
+			var remote = remoteId.value;
+			deleteConnectUserData(me,remote);
     		remoteId.value='';
+
     	});
   });
 
@@ -86,6 +92,12 @@ async function main() {
 	    	console.log('close button clicked');
     		mediaConnection.close(true);
     		DATACONNECTION.close(true);
+
+    		var me = $('#userid').val();
+			var remote = remoteId.value;
+			deleteConnectUserData(me,remote);
+    		remoteId.value='';
+
     		remoteId.value='';
     	});
   });
