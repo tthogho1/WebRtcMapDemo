@@ -12,6 +12,7 @@ import com.example.demo.bean.ResultStatus;
 import com.example.demo.bean.Status;
 import com.example.demo.bean.User;
 import com.example.demo.cache.CacheFactory;
+import com.example.demo.cache.CacheName;
 
 @Service
 public class ItemService {
@@ -21,8 +22,8 @@ public class ItemService {
 
 	public ItemService() {
 
-		this.userCache = CacheFactory.getCache("User");
-		this.locationCache = CacheFactory.getCache("Location");
+		this.userCache = CacheFactory.getCache(CacheName.User.toString());
+		this.locationCache = CacheFactory.getCache(CacheName.Location.toString());
 	}
 
 	public CacheCollection<Object> findAllUserByJson() {

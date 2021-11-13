@@ -45,6 +45,9 @@ public class CacheFactory {
 		cache = cacheManager.administration().withFlags(CacheContainerAdmin.AdminFlag.VOLATILE).getOrCreateCache(name,
 				builder.build());
 
+		if (CacheName.User.toString().equals(name)) {
+			cache.addListener(new CacheEntryListener());
+		}
 		// over write ???
 		CacheMap.put(name, cache);
 		return cache;

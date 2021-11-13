@@ -14,6 +14,7 @@ import org.infinispan.query.dsl.QueryFactory;
 
 import com.example.demo.bean.User;
 import com.example.demo.cache.CacheFactory;
+import com.example.demo.cache.CacheName;
 
 @Component
 public class RunRemoveItems {
@@ -24,7 +25,7 @@ public class RunRemoveItems {
 	@Scheduled(initialDelay = 0, fixedDelay = 1000 * 60)
 	public void execute() {
 
-		Cache<String,Object> userCache = CacheFactory.getCache("User");
+		Cache<String,Object> userCache = CacheFactory.getCache(CacheName.User.toString());
 
 		String compareTime = Long.toString(System.currentTimeMillis() - 60*1000);
 		QueryFactory qf = Search.getQueryFactory(userCache);
