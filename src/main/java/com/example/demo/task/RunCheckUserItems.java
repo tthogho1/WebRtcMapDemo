@@ -17,7 +17,7 @@ import com.example.demo.cache.CacheFactory;
 import com.example.demo.cache.CacheName;
 
 @Component
-public class RunRemoveItems {
+public class RunCheckUserItems {
 
 	private int i = 0;
 	private static final SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
