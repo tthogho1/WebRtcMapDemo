@@ -78,7 +78,13 @@ body {
 
 </script>
 
-
+<script>
+$(function(){
+	$(window).on('beforeunload', function(event) {
+		removeUserById();
+	});
+});
+</script>
 <script type="text/javascript">
 
 var GOOGLE_MAP ;
@@ -592,7 +598,7 @@ function _ajaxforUserCtrl(purl,sendData){
 }
 
 function updateUserData(from,to){
-	let purl = "./setUserInfo";
+	let purl = "./setConnectUserInfo";
 
 	let sendData = "from=" + from + "&to=" + to;
 
@@ -603,8 +609,24 @@ function updateUserData(from,to){
 }
 
 
+function removeUserById(){
+	let purl = "./removeUserById";
+	let userId = $("#userid").val();
+
+	if (userId == ""  ){
+		return;
+	}
+
+	let sendData = "userId=" + userId;
+	var status;
+	status = _ajaxforUserCtrl(purl,sendData);
+
+	return status;
+}
+
+
 function deleteConnectUserData(me,remote){
-	let purl = "./deleteUserInfo";
+	let purl = "./deleteConnectUserInfo";
 
 	let sendData = "me=" + me + "&remote=" + remote;
 

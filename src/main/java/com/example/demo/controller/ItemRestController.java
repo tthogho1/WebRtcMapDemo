@@ -54,8 +54,8 @@ public class ItemRestController {
 		return cc ;
 	}
 
-	@RequestMapping(value = "/setUserInfo", method = RequestMethod.POST)
-	public ResultStatus setUserInfo4Connection(HttpServletRequest request) {
+	@RequestMapping(value = "/setConnectUserInfo", method = RequestMethod.POST)
+	public ResultStatus setConnectUserInfo4Connection(HttpServletRequest request) {
 
 		String from = request.getParameter("from");
 		String to = request.getParameter("to");
@@ -65,7 +65,7 @@ public class ItemRestController {
 		return rs ;
 	}
 
-	@RequestMapping(value = "/deleteUserInfo", method = RequestMethod.POST)
+	@RequestMapping(value = "/deleteConnectUserInfo", method = RequestMethod.POST)
 	public ResultStatus deleteUserInfo4Close(HttpServletRequest request) {
 
 		String me = request.getParameter("me");
@@ -76,6 +76,15 @@ public class ItemRestController {
 		return rs ;
 	}
 
+	@RequestMapping(value = "/removeUserById", method = RequestMethod.POST)
+	public ResultStatus removeUserById(HttpServletRequest request) {
+
+		String id = request.getParameter("userId");
+
+		ResultStatus rs = itemService.removeUserById(id);
+
+		return rs ;
+	}
 
 
 }

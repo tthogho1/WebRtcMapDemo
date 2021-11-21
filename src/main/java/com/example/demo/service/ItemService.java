@@ -46,6 +46,16 @@ public class ItemService {
 
 	}
 
+	public ResultStatus removeUserById(String id) {
+
+		ResultStatus rs = new ResultStatus();
+		User u = (User)userCache.remove(id);
+		if (u == null) {
+			rs.setStatus(Status.ERROR.toString());
+		}
+
+		return rs;
+	}
 
 	public void createItem(LocationItem locItem) {
 

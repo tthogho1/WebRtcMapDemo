@@ -20,12 +20,8 @@ public class CacheEntryListener {
 	    System.out.println("New entry " + event.getKey() + " created in the cache");
 	  }
 
-	  @CacheEntryExpired
-	  public void printExpired(CacheEntryExpiredEvent event) {
-		  System.out.println("Expired entry " + event.getKey() + " created in the cache");
 
-		  String expiredUserName = (String)event.getKey();
-		  User expiredUser = (User)event.getValue();
+	  private void removeConnectUserIfExist(String expiredUserName,User expiredUser) {
 		  String connectedUserName = null;
 
 		  if (expiredUser != null && !expiredUser.equals("")) {
@@ -48,5 +44,31 @@ public class CacheEntryListener {
 			  connectedUser.setConnectingId("");
 			  userCache.put(connectedUserName, connectedUser);
 		  }
+
 	  }
+
+	  @CacheEntryExpired
+	  public void processExpired(CacheEntryExpiredEvent event) {
+		  System.out.println("Expired entry " + event.getKey() + " created in the cache");
+
+		  String expiredUserName = (String)event.getKey();
+		  User expiredUser = (User)event.getValue();
+
+		  removeConnectUserIfExist(expiredUserName,expiredUser);
+	  }
+
+
+	  @CacheEntryRemoved
+	  public void processRemoved(CacheEntryRemovedEvent event) {
+		  System.out.println("Expired entry " + event.getKey() + " created in the cache");
+
+		  String expiredUserName = (String)event.getKey();
+		  User expiredUser = (User)event.getValue();
+
+		  removeConnectUserIfExist(expiredUserName,expiredUser);
+	  }
+
+
+
+
 }
