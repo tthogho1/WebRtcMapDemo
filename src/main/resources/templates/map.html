@@ -90,7 +90,7 @@ $(function(){
 var GOOGLE_MAP ;
 var users ={};
 var places ;
-
+const geocoder = new google.maps.Geocoder();
 
 function createNameLink(name){
 
@@ -244,10 +244,24 @@ function usersDisplay(){
 }
 
 
+function getCountryNameBylatlng(latlng){
+
+	geocoder.geocode({ location: latlng })
+	    .then((response) => {
+		if (response.results[0]) {
+			let result = response.results.slice(-1)[0];
+	        return result.formatted_address;
+		} else {
+	        window.alert("No country found");
+		}
+	}).catch((e) => window.alert("Geocoder failed due to: " + e));
+
+}
+
+
 function postUser(setcenter){
 	var purl = "./ajaxPostUser";
 	var sendData = "id=" +  $('#userid').val() + "&longitude=" + $('#longitude').val() + "&latitude=" + $('#latitude').val();
-
 	//
 	// fix later !!
 	navigator.geolocation.getCurrentPosition(
@@ -260,9 +274,11 @@ function postUser(setcenter){
 			}
 	);
 
+	let latlng = new google.maps.LatLng($('#latitude').val(),$('#longitude').val())
 	if (setcenter){
-		GOOGLE_MAP.setCenter( new google.maps.LatLng($('#latitude').val(),$('#longitude').val()) );
+		GOOGLE_MAP.setCenter( latlng );
 	}
+	$('#country').val(getCountryNameBylatlng(latlng));
 
     $.ajax({
         url: purl,
@@ -278,7 +294,7 @@ function postUser(setcenter){
     	alert("error occurred on postUser");
     });
 
-    setTimeout(postUser, 1000*30);
+    setTimeout(postUser, 1000*300);
 }
 
 function OpenWebComWindow(url){
@@ -289,7 +305,6 @@ function webComMarkerInfo(marker, data) {
 	let day = data["player"]["day"];
 　	let title = data["title"];　
   	let url = day["embed"];
-
 
   	google.maps.event.addListener(marker,"click",function(){
 
@@ -312,6 +327,12 @@ function createWebComItemMarker(id,latlng){
 }
 
 function setWebComIcon(data,webComList){
+	if (data.lentgh >= 300 ){
+    	$('#info').html("there is over 300 item (limit 300 item)");		
+	}else{
+    	$('#info').html("");		
+	}
+	
 	data.forEach(element => {
 		let loc = element["location"];
 		let latlng = new google.maps.LatLng(loc.latitude ,loc.longitude );
@@ -325,19 +346,42 @@ function setWebComIcon(data,webComList){
 
 var webComList = [];
 function getWebCom(){
-	var baseurl = "/list";
+	var baseurl = "http://localhost:3000/list";
 
     var latlngBound = GOOGLE_MAP.getBounds();
     var latlngNE = latlngBound.getNorthEast();
     var latlngSW = latlngBound.getSouthWest();
 
-    var sendData ={
+    var sendData = {
 		latitudegt:latlngSW.lat(),
     	latitudelt:latlngNE.lat(),
     	longitudegt:latlngSW.lng(),
     	longitudelt:latlngNE.lng()
     };
 
+    //Workerオブジェクト
+    var worker = new Worker('./js/webcamfetch.js');
+    worker.postMessage({
+        'latitudegt': latlngSW.lat(),
+        'latitudelt': latlngNE.lat(),
+		'longitudegt':latlngSW.lng(),
+		'longitudelt':latlngNE.lng()
+    });
+
+
+    worker.addEventListener('message', function(e) {
+    	// delete all webcom
+		webComList.forEach(element => {
+			element.setMap(null);
+		});
+
+    	webComList = [];
+    	setWebComIcon(e.data,webComList); // set  id to  idList from data
+    	$('#error').html("");
+        
+    }, false);
+    
+   /* 
     $.ajax({
         url: baseurl,
         type:'GET',
@@ -357,7 +401,7 @@ function getWebCom(){
     	$('#error').html("error occurred to get webcamlist");
     	// alert("error occurred to get webComList");
     });
-
+	*/
 }
 
 const Peer = window.Peer;
@@ -465,6 +509,7 @@ function getIdAndLocation() {
 			</span>
 			<span style="display:block;float:right;font-size:15px;">Your ID : </span>
 			<span id="error" style="color:red;display:block;float:right;font-size:15px; margin-right : 10px;"></span>
+			<span id="info" style="display:block;float:right;font-size:15px; margin-right : 10px;"></span>
 		</div>
 	</div>
 		<!--  input id="userid" type="hidden" th:value="${user.id}" / -->
@@ -501,6 +546,7 @@ function getIdAndLocation() {
 	</th:block>
 		<input id="longitude" type="text" th:value="${user.longitude}" />
 		<input id="latitude" type="text" th:value="${user.latitude}" />
+		<input id="country" type="text" th:value="${user.country}" />
 		<input id="postUser" type="button" value="TEST" onclick="postUser(true);" />
 	</div>
 	<div style="text-align:right">
@@ -715,6 +761,8 @@ const MARKER_PATH ="https://developers.google.com/maps/documentation/javascript/
 var infoWindow = new google.maps.InfoWindow({
     content: document.getElementById("info-content"),
   });
+
+
 function searchHotel(){
   const search = {
     bounds: GOOGLE_MAP.getBounds(),
