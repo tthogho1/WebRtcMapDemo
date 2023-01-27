@@ -259,26 +259,10 @@ function getCountryNameBylatlng(latlng){
 }
 
 
-function postUser(setcenter){
+function callUserInfo(){
+
 	var purl = "./ajaxPostUser";
 	var sendData = "id=" +  $('#userid').val() + "&longitude=" + $('#longitude').val() + "&latitude=" + $('#latitude').val();
-	//
-	// fix later !!
-	navigator.geolocation.getCurrentPosition(
-			function (position) {
-		    	$('#longitude').val(position.coords.longitude);
-			    $('#latitude').val(position.coords.latitude);
-			},
-			function(error){
-				alert("get location error : " + error.code);
-			}
-	);
-
-	let latlng = new google.maps.LatLng($('#latitude').val(),$('#longitude').val())
-	if (setcenter){
-		GOOGLE_MAP.setCenter( latlng );
-	}
-	$('#country').val(getCountryNameBylatlng(latlng));
 
     $.ajax({
         url: purl,
@@ -293,8 +277,31 @@ function postUser(setcenter){
     }).fail(function(XMLHttpRequest, textStatus,errorThrown) {
     	alert("error occurred on postUser");
     });
+	
+}
 
-    setTimeout(postUser, 1000*300);
+function postUser(setcenter,callback){
+	//
+	// fix later !!
+	navigator.geolocation.getCurrentPosition(
+		function (position) {
+			$('#longitude').val(position.coords.longitude);
+			$('#latitude').val(position.coords.latitude);
+
+			let latlng = new google.maps.LatLng($('#latitude').val(),$('#longitude').val())
+			if (setcenter){
+				GOOGLE_MAP.setCenter( latlng );
+			}
+			$('#country').val(getCountryNameBylatlng(latlng));
+			callback();    
+		},
+		function(error){
+			alert("get location error : " + error.code);
+		}
+	);
+
+
+    setTimeout(function(){postUser(false,callUserInfo)}, 1000*300);
 }
 
 function OpenWebComWindow(url){
@@ -478,7 +485,8 @@ function getIdAndLocation() {
 
 	peer.once('open', id => {
 		$('#userid').val(id);
-		navigator.geolocation.getCurrentPosition(
+	    $('#postUser').click();
+	/*	navigator.geolocation.getCurrentPosition(
 				function (position) {
 				//	    geo_text += "位置精度:" + position.coords.accuracy + "\n";
 			    	$('#longitude').val(position.coords.longitude);
@@ -488,7 +496,7 @@ function getIdAndLocation() {
 				function(error){
 					alert("get location error : " + error.code);
 				}
-		);
+		); */
 	});
 
 }
@@ -547,7 +555,7 @@ function getIdAndLocation() {
 		<input id="longitude" type="text" th:value="${user.longitude}" />
 		<input id="latitude" type="text" th:value="${user.latitude}" />
 		<input id="country" type="text" th:value="${user.country}" />
-		<input id="postUser" type="button" value="TEST" onclick="postUser(true);" />
+		<input id="postUser" type="button" value="TEST" onclick="postUser(true,callUserInfo);" />
 	</div>
 	<div style="text-align:right">
 		<div onclick="usersDisplay();" style="display:inline-block">▼user list</div>
@@ -742,7 +750,7 @@ var Options = {
 
 GOOGLE_MAP = new google.maps.Map(document.getElementById('map'), Options);
 
-GOOGLE_MAP.addListener("bounds_changed",()=>{
+GOOGLE_MAP.addListener("idle",()=>{
 	setTimeout(getWebCom, 1000);
 	searchHotel();
 });
