@@ -258,40 +258,29 @@ function getCountryNameBylatlng(latlng){
 
 }
 
-
 function callUserInfo(){
 
-	var purl = "./ajaxPostUser";
-	var sendData = "id=" +  $('#userid').val() + "&longitude=" + $('#longitude').val() + "&latitude=" + $('#latitude').val();
-/*
-    $.ajax({
-        url: purl,
-        type:'POST',
-        data : sendData ,
-        timeout:1000*10
-    }).done(function(data){
-		var idList =[];
-
-    	setUserIcon(data,idList); // set  id to  idList from data
-    	deleteAbsentUser(users,idList); // delete users not in idList
-    }).fail(function(XMLHttpRequest, textStatus,errorThrown) {
-    	alert("error occurred on postUser");
-    }); */
     var dataJson = {};
     dataJson.userid = $('#userid').val();
     dataJson.longitude =  $('#longitude').val();
     dataJson.latitude = $('#latitude').val();
 	var userId = $('#userid').val();
+	
 	var posWorker = new Worker('./js/userfetch.js');
 	posWorker.postMessage(dataJson);
 
 	posWorker.addEventListener('message',function(e){
 		var idList =[];
-			
+
+		console.log("get Users information");	
 	 	setUserIcon(e.data,idList); // set  id to  idList from data
 		deleteAbsentUser(users,idList); // delete users not in idList
 	},false);
+
 }
+
+
+
 
 function postUser(setcenter,callback){
 	//
@@ -346,6 +335,8 @@ function createWebComItemMarker(id,latlng){
 	return marker ;
 }
 
+
+var worker = null;
 function setWebComIcon(data,webComList){
 	if (data.lentgh >= 300 ){
     	$('#info').html("there is over 300 item (limit 300 item)");		
@@ -380,7 +371,21 @@ function getWebCom(){
     };
 
     //Workerオブジェクト
-    var worker = new Worker('./js/webcamfetch.js');
+    if (worker == null){
+    	worker = new Worker('./js/webcamfetch.js');
+        worker.addEventListener('message', function(e) {
+        	// delete all webcom
+    		webComList.forEach(element => {
+    			element.setMap(null);
+    		});
+
+        	webComList = [];
+        	setWebComIcon(e.data,webComList); // set  id to  idList from data
+        	$('#error').html("");
+            
+        }, false);
+    }
+
     worker.postMessage({
         'latitudegt': latlngSW.lat(),
         'latitudelt': latlngNE.lat(),
@@ -388,40 +393,6 @@ function getWebCom(){
 		'longitudelt':latlngNE.lng()
     });
 
-
-    worker.addEventListener('message', function(e) {
-    	// delete all webcom
-		webComList.forEach(element => {
-			element.setMap(null);
-		});
-
-    	webComList = [];
-    	setWebComIcon(e.data,webComList); // set  id to  idList from data
-    	$('#error').html("");
-        
-    }, false);
-    
-   /* 
-    $.ajax({
-        url: baseurl,
-        type:'GET',
-        data : sendData ,
-        async : false,
-        timeout:1000*10
-    }).done(function(data){
-    	// delete all webcom
-		webComList.forEach(element => {
-			element.setMap(null);
-		});
-
-    	webComList = [];
-    	setWebComIcon(data,webComList); // set  id to  idList from data
-    	$('#error').html("");
-    }).fail(function(XMLHttpRequest, textStatus,errorThrown) {
-    	$('#error').html("error occurred to get webcamlist");
-    	// alert("error occurred to get webComList");
-    });
-	*/
 }
 
 const Peer = window.Peer;
@@ -499,20 +470,9 @@ function getIdAndLocation() {
 	var watchID;
 	peer.once('open', id => {
 		$('#userid').val(id);
-	    $('#postUser').click();
 
 	    watchID = navigator.geolocation.watchPosition(success, positionError,{ enableHighAccuracy: true });
-	/*	navigator.geolocation.getCurrentPosition(
-				function (position) {
-				//	    geo_text += "位置精度:" + position.coords.accuracy + "\n";
-			    	$('#longitude').val(position.coords.longitude);
-				    $('#latitude').val(position.coords.latitude);
-				    $('#postUser').click();
-				},
-				function(error){
 
-				}
-		); */
 	});
 
 }
@@ -526,21 +486,12 @@ function success(position)
 	$('#longitude').val(position.coords.longitude);
     $('#latitude').val(position.coords.latitude);	
 
-    var userId = $('#userid').val();
-	var posWorker = new Worker('./js/userfetch.js');
-	posWorker.postMessage({
-		'userid':userId,
-		'longitude':position.coords.longitude,
-		'latitude':position.coords.latitude
-	});
-
-	posWorker.addEventListener('message',function(e){
-		var idList =[];
-		
-    	setUserIcon(e.data,idList); // set  id to  idList from data
-    	deleteAbsentUser(users,idList); // delete users not in idList
-	},false);
+    //callUserInfo();
+    postUser(true,callUserInfo);
+    
+   // $('#postUser').click();
 }
+
 
 
 </script>

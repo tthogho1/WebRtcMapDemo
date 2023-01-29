@@ -23,9 +23,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/",
                 		"/error",
                 		"/webjars/**",
+                		"/img/**",
                 		"/js/**",
                 		"/_shared/**",
                 		"/ajaxPostUser",
+                		"/setConnectUserInfo",
                 		"/getItems",
                 		"/getMap").permitAll()
                 .anyRequest().authenticated()
@@ -39,6 +41,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .csrf(c -> c
                     .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
                     .ignoringAntMatchers("/ajaxPostUser")
+                    .ignoringAntMatchers("/setConnectUserInfo")
              )
             .oauth2Login();
         // @formatter:on

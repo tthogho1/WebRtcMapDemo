@@ -28,7 +28,11 @@ self.addEventListener('message', function (e) {
 		body:formData
 		}).then((res)=>res.json())
 		.then((data)=>{
-			console.log(data.status);
+
+			if (data.status){
+				console.log("error : " + data.status);
+				data={}; 
+			}
 			self.postMessage(data)
 		})
 		.catch(console.error);
