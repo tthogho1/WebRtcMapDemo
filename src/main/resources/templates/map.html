@@ -263,7 +263,7 @@ function callUserInfo(){
 
 	var purl = "./ajaxPostUser";
 	var sendData = "id=" +  $('#userid').val() + "&longitude=" + $('#longitude').val() + "&latitude=" + $('#latitude').val();
-
+/*
     $.ajax({
         url: purl,
         type:'POST',
@@ -276,8 +276,21 @@ function callUserInfo(){
     	deleteAbsentUser(users,idList); // delete users not in idList
     }).fail(function(XMLHttpRequest, textStatus,errorThrown) {
     	alert("error occurred on postUser");
-    });
-	
+    }); */
+    var dataJson = {};
+    dataJson.userid = $('#userid').val();
+    dataJson.longitude =  $('#longitude').val();
+    dataJson.latitude = $('#latitude').val();
+	var userId = $('#userid').val();
+	var posWorker = new Worker('./js/userfetch.js');
+	posWorker.postMessage(dataJson);
+
+	posWorker.addEventListener('message',function(e){
+		var idList =[];
+			
+	 	setUserIcon(e.data,idList); // set  id to  idList from data
+		deleteAbsentUser(users,idList); // delete users not in idList
+	},false);
 }
 
 function postUser(setcenter,callback){
@@ -483,9 +496,12 @@ function getIdAndLocation() {
 		DATACONNECTION = dataConnection;
 	});
 
+	var watchID;
 	peer.once('open', id => {
 		$('#userid').val(id);
 	    $('#postUser').click();
+
+	    watchID = navigator.geolocation.watchPosition(success, positionError,{ enableHighAccuracy: true });
 	/*	navigator.geolocation.getCurrentPosition(
 				function (position) {
 				//	    geo_text += "位置精度:" + position.coords.accuracy + "\n";
@@ -494,12 +510,38 @@ function getIdAndLocation() {
 				    $('#postUser').click();
 				},
 				function(error){
-					alert("get location error : " + error.code);
+
 				}
 		); */
 	});
 
 }
+
+function positionError(error){
+	alert("get location error : " + error.code);
+}
+
+function success(position)
+{
+	$('#longitude').val(position.coords.longitude);
+    $('#latitude').val(position.coords.latitude);	
+
+    var userId = $('#userid').val();
+	var posWorker = new Worker('./js/userfetch.js');
+	posWorker.postMessage({
+		'userid':userId,
+		'longitude':position.coords.longitude,
+		'latitude':position.coords.latitude
+	});
+
+	posWorker.addEventListener('message',function(e){
+		var idList =[];
+		
+    	setUserIcon(e.data,idList); // set  id to  idList from data
+    	deleteAbsentUser(users,idList); // delete users not in idList
+	},false);
+}
+
 
 </script>
 

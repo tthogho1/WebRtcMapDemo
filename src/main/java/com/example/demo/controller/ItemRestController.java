@@ -13,7 +13,10 @@ import com.example.demo.bean.User;
 //import com.example.domain.Item;
 import com.example.demo.service.ItemService;
 
+import lombok.extern.java.Log;
+
 @RestController
+@Log
 public class ItemRestController {
 	@Autowired
 	ItemService itemService;
@@ -43,6 +46,8 @@ public class ItemRestController {
 		user.setLatitude(request.getParameter("latitude"));
 		user.setLongitude(request.getParameter("longitude"));
 
+		log.info(user.getId() + user.getLatitude() + user.getLongitude() );
+		
 		String datetimeS = Long.toString(System.currentTimeMillis());
 		user.setDatetime(datetimeS);
 
