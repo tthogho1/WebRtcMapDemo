@@ -37,8 +37,8 @@ public class ItemRestController {
 		return cc ;
 	}
 
-	@RequestMapping(value = "/ajaxPostUser", method = RequestMethod.POST)
-	public CacheCollection<Object> ajaxPostUser(HttpServletRequest request) {
+	@RequestMapping(value = "/ajaxPostUserInfo", method = RequestMethod.POST)
+	public CacheCollection<Object> ajaxPostUserInfo(HttpServletRequest request) {
 
 		User user = new User();
 
@@ -59,6 +59,29 @@ public class ItemRestController {
 		return cc ;
 	}
 
+	
+	@RequestMapping(value = "/ajaxPostUser", method = RequestMethod.POST)
+	public String ajaxPostUser(HttpServletRequest request) {
+
+		User user = new User();
+
+		user.setId(request.getParameter("id"));
+		user.setLatitude(request.getParameter("latitude"));
+		user.setLongitude(request.getParameter("longitude"));
+
+		log.info(user.getId() + user.getLatitude() + user.getLongitude() );
+		
+		String datetimeS = Long.toString(System.currentTimeMillis());
+		user.setDatetime(datetimeS);
+
+		itemService.createUser(user);
+
+		// return customers;
+		return "{retulut:ok}" ;
+	}
+	
+	
+	
 	@RequestMapping(value = "/setConnectUserInfo", method = RequestMethod.POST)
 	public ResultStatus setConnectUserInfo4Connection(HttpServletRequest request) {
 

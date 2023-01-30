@@ -29,7 +29,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 		"/ajaxPostUser",
                 		"/setConnectUserInfo",
                 		"/getItems",
-                		"/getMap").permitAll()
+                		"/getMap",
+                		"/getUsers").permitAll()
                 .anyRequest().authenticated()
             )
             .exceptionHandling(e -> e
