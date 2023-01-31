@@ -1,4 +1,4 @@
-const baseurl = "../ajaxPostUser";
+const baseurl = "../ajaxPostUserInfo";
 const headers = {
   'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8'
 };
@@ -26,17 +26,17 @@ self.addEventListener('message', function (e) {
 		method:'POST',
 		headers:headers,
 		body:formData
-		}).then((res)=>res.json())
+		})
+		.then((res)=>res.json())
 		.then((data)=>{
-
 			if (data.status){
 				console.log("error : " + data.status);
 				data={}; 
 			}
-			self.postMessage(data)
+			self.postMessage(data);
 		})
-		.catch(console.error);
-//	self.postMessage(Number(e.data.width) * Number(e.data.height));
+		.catch((error)=>{
+			console.log(error);
+		});
   }
-  
 })

@@ -272,7 +272,7 @@ function callUserInfo(){
 	posWorker.addEventListener('message',function(e){
 		var idList =[];
 
-		console.log("get Users information");	
+		console.log("set Users information");	
 	 	setUserIcon(e.data,idList); // set  id to  idList from data
 		deleteAbsentUser(users,idList); // delete users not in idList
 	},false);
@@ -280,12 +280,10 @@ function callUserInfo(){
 }
 
 
-
-
 function postUser(setcenter,callback){
 	//
 	// fix later !!
-	navigator.geolocation.getCurrentPosition(
+/*	navigator.geolocation.getCurrentPosition(
 		function (position) {
 			$('#longitude').val(position.coords.longitude);
 			$('#latitude').val(position.coords.latitude);
@@ -300,10 +298,15 @@ function postUser(setcenter,callback){
 		function(error){
 			alert("get location error : " + error.code);
 		}
-	);
+	);*/
 
-
-    setTimeout(function(){postUser(false,callUserInfo)}, 1000*300);
+	let latlng = new google.maps.LatLng($('#latitude').val(),$('#longitude').val());
+	$('#country').val(getCountryNameBylatlng(latlng));
+	if (setcenter){
+		GOOGLE_MAP.setCenter( latlng );
+	}
+	callback();
+    //setTimeout(function(){postUser(false,callUserInfo)}, 1000*300);
 }
 
 function OpenWebComWindow(url){
@@ -393,6 +396,7 @@ function getWebCom(){
 		'longitudelt':latlngNE.lng()
     });
 
+
 }
 
 const Peer = window.Peer;
@@ -481,14 +485,19 @@ function positionError(error){
 	alert("get location error : " + error.code);
 }
 
+var first=true;
 function success(position)
 {
 	$('#longitude').val(position.coords.longitude);
     $('#latitude').val(position.coords.latitude);	
 
     //callUserInfo();
-    postUser(true,callUserInfo);
-    
+    if (first){
+    	postUser(true,callUserInfo);
+    	first = false;
+    }else{
+    	postUser(false,callUserInfo);
+    }
    // $('#postUser').click();
 }
 
