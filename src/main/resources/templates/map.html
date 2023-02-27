@@ -11,10 +11,12 @@
 <script src="//cdn.webrtc.ecl.ntt.com/skyway-4.4.1.js"></script>
 <script th:src="@{/_shared/key.js}"></script>
 <script th:src="@{/js/webrtc_script.js?20211107}"></script>
+<script th:src="@{/js/map.js}"></script>
 <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
 <!-- script type="text/javascript" th:src="@{/js/connect.js}" ></script -->
-<!--  script	src="https://maps.google.com/maps/api/js?key=AIzaSyAYemHqW9xU48b7KhMXauA6P0fDFTWyly0"></script -->
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAYemHqW9xU48b7KhMXauA6P0fDFTWyly0&libraries=places"></script>
+
+<!--  script	src="https://maps.google.com/maps/api/js?key=AIzaSyAYemHqW9xU48b7KhMXauA6P0fDFTWyly0"></script -->
 
 <style>
 
@@ -38,8 +40,6 @@ body {
 	height:240px;
 	overflow-y: auto;
 }
-
-
 
 .map {
 	height: 80%;
@@ -258,7 +258,7 @@ function getCountryNameBylatlng(latlng){
 
 }
 
-function callUserInfo(){
+function callUserInfo(posWorker){
 
     var dataJson = {};
     dataJson.userid = $('#userid').val();
@@ -266,7 +266,6 @@ function callUserInfo(){
     dataJson.latitude = $('#latitude').val();
 	var userId = $('#userid').val();
 	
-	var posWorker = new Worker('./js/userfetch.js');
 	posWorker.postMessage(dataJson);
 
 	posWorker.addEventListener('message',function(e){
@@ -472,11 +471,18 @@ function getIdAndLocation() {
 	});
 
 	var watchID;
+	var posWorker = new Worker('./js/userfetch.js');
+	var pollingWorker = new Worker('./js/userfetch.js');
 	peer.once('open', id => {
 		$('#userid').val(id);
 
-	    watchID = navigator.geolocation.watchPosition(success, positionError,{ enableHighAccuracy: true });
+		watchID = navigator.geolocation.watchPosition((position)=>{success(position,posWorker)}, positionError,{ enableHighAccuracy: true });
 
+		// 30秒ごとに実行
+		setInterval(() => {
+			postUser(false,function(){callUserInfo(pollingWorker);});
+		}, 1000*30);
+		    
 	});
 
 }
@@ -486,17 +492,17 @@ function positionError(error){
 }
 
 var first=true;
-function success(position)
+function success(position,posWorker)
 {
 	$('#longitude').val(position.coords.longitude);
     $('#latitude').val(position.coords.latitude);	
 
     //callUserInfo();
     if (first){
-    	postUser(true,callUserInfo);
+    	postUser(true,function(){callUserInfo(posWorker);});
     	first = false;
     }else{
-    	postUser(false,callUserInfo);
+    	postUser(false,function(){callUserInfo(posWorker);});
     }
    // $('#postUser').click();
 }
@@ -752,130 +758,25 @@ var Options = {
 
 GOOGLE_MAP = new google.maps.Map(document.getElementById('map'), Options);
 
+var Gmap = new GoogleMap(GOOGLE_MAP,document.getElementById('map'));
+
 GOOGLE_MAP.addListener("idle",()=>{
 	setTimeout(getWebCom, 1000);
-	searchHotel();
+	Gmap.searchHotel();
 });
 
-places = new google.maps.places.PlacesService(GOOGLE_MAP);
-var hotels=[];
 	// Search for hotels in the selected city, within the viewport of the map.
-
+/*
 function dropMarker(map) {
   return function () {
     map.setMap(GOOGLE_MAP);
   };
 }
+*/
 
-const MARKER_PATH ="https://developers.google.com/maps/documentation/javascript/images/marker_green";
 var infoWindow = new google.maps.InfoWindow({
     content: document.getElementById("info-content"),
   });
-
-
-function searchHotel(){
-  const search = {
-    bounds: GOOGLE_MAP.getBounds(),
-    types: ["lodging"],
-  };
-  places.nearbySearch(search, (results, status, pagination) => {
-    if (status === google.maps.places.PlacesServiceStatus.OK && results) {
-//      clearResults();
-		hotels.forEach(element => {
-			element.setMap(null);
-		});
-	  hotels=[];
-	  for (let i = 0; i < results.length; i++) {
-        const markerLetter = String.fromCharCode("A".charCodeAt(0) + (i % 26));
-        const markerIcon = MARKER_PATH + markerLetter + ".png";
-
-        hotels[i] = new google.maps.Marker({
-          position: results[i].geometry.location,
-          animation: google.maps.Animation.DROP,
-          icon: markerIcon,
-        });
-	        // If the user clicks a hotel marker, show the details of that hotel
-	        // in an info window.
-        hotels[i].placeResult = results[i];
-        google.maps.event.addListener(hotels[i], "click", showInfoWindow);
-        setTimeout(dropMarker(hotels[i]), i * 100);
-        //addResult(results[i], i);
-      }
-    }
-  });
-}
-
-
-function showInfoWindow() {
-	const marker = this;
-	places.getDetails(
-		{ placeId: marker.placeResult.place_id },
-	    	(place, status) => {
-	      		if (status !== google.maps.places.PlacesServiceStatus.OK) {
-	        		return;
-	      		}
-	      infoWindow.open(map, marker);
-	      buildIWContent(place);
-	    }
-	);
-}
-
-	// Load the place information into the HTML elements used by the info window.
-function buildIWContent(place) {
-	  document.getElementById("iw-icon").innerHTML =
-	    '<img class="hotelIcon" ' + 'src="' + place.icon + '"/>';
-
-	  //let cont = "<a href=\"javascript:OpenWebComWindow('" + url + "')\";>" + title + "</a>";
-	  // 	    '<b><a href="OpenWWebComWIndow(' + place.url + ')">' + place.name + "</a></b>";
-	  document.getElementById("iw-url").innerHTML =
-	    "<b><a href=\"javascript:OpenWebComWindow('" + place.url + "');\">" + place.url + "</a></b>" ;
-
-	  document.getElementById("iw-address").textContent = place.vicinity;
-
-	  if (place.formatted_phone_number) {
-	    document.getElementById("iw-phone-row").style.display = "";
-	    document.getElementById("iw-phone").textContent =
-	      place.formatted_phone_number;
-	  } else {
-	    document.getElementById("iw-phone-row").style.display = "none";
-	  }
-
-	  // Assign a five-star rating to the hotel, using a black star ('&#10029;')
-	  // to indicate the rating the hotel has earned, and a white star ('&#10025;')
-	  // for the rating points not achieved.
-	  if (place.rating) {
-	    let ratingHtml = "";
-
-	    for (let i = 0; i < 5; i++) {
-	      if (place.rating < i + 0.5) {
-	        ratingHtml += "&#10025;";
-	      } else {
-	        ratingHtml += "&#10029;";
-	      }
-	      document.getElementById("iw-rating-row").style.display = "";
-	      document.getElementById("iw-rating").innerHTML = ratingHtml;
-	    }
-	  } else {
-	    document.getElementById("iw-rating-row").style.display = "none";
-	  }
-
-	  // The regexp isolates the first part of the URL (domain plus subdomain)
-	  // to give a short URL for displaying in the info window.
-	  if (place.website) {
-	    let fullUrl = place.website;
-	    let website = String(hostnameRegexp.exec(place.website));
-
-	    if (!website) {
-	      website = "http://" + place.website + "/";
-	      fullUrl = website;
-	    }
-	    document.getElementById("iw-website-row").style.display = "";
-	    document.getElementById("iw-website").textContent = website;
-	  } else {
-	    document.getElementById("iw-website-row").style.display = "none";
-	  }
-}
-
 
 </script>
 

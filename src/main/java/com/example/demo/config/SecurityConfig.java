@@ -27,6 +27,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 		"/js/**",
                 		"/_shared/**",
                 		"/ajaxPostUser",
+                		"/ajaxPostUserInfo",
                 		"/setConnectUserInfo",
                 		"/getItems",
                 		"/getMap",
@@ -42,6 +43,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .csrf(c -> c
                     .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
                     .ignoringAntMatchers("/ajaxPostUser")
+                    .ignoringAntMatchers("/ajaxPostUserInfo")
                     .ignoringAntMatchers("/setConnectUserInfo")
              )
             .oauth2Login();

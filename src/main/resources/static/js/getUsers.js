@@ -1,10 +1,10 @@
 const baseurl = "../getUsers";
-const headers = {
+/*const headers = {
   'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8'
-};
+};*/
 
 
- const headers = {'Accept':'application/json'};		
+const headers = {'Accept':'application/json'};		
 //console.log("fetch API" + sendData);
  fetch(baseurl,{
 	headers:headers,

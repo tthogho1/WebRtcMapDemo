@@ -13,7 +13,7 @@ self.addEventListener('message', function (e) {
   } else {
 	var url = baseurl ;
 	//var sendData = "id=" +  e.data.userid + "&longitude=" + e.data.longitude + "&latitude=" + e.data.latitude;
-	const headers = {'Accept':'application/json'};	
+//	const headers = {'Accept':'application/json'};	
 	const method = "POST";
 	
 	var formData = new FormData();
@@ -24,7 +24,6 @@ self.addEventListener('message', function (e) {
 	//console.log("fetch API" + sendData);
 	fetch(url,{
 		method:'POST',
-		headers:headers,
 		body:formData
 		})
 		.then((res)=>res.json())
